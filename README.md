@@ -32,12 +32,11 @@ To bypass the Readout protection (APPROTECT) of an nRF52 connect all of the abov
 - N-Channel MOSFET **VOUT-** to nRF52 **DEC1** (as shown) (Optional: O-scope **Channel 1 Probe**)
 - Then power the nRF52 as needed
 
-
 ### Required Hardware
 
 - ESP32, ESP32-S3, or ESP32-C3 Development Board
-- N-Channel MOSFET Board
-- nRF52 Series Board
+- N-Channel MOSFET Board (for glitcher)
+- nRF52 Series Board (nRF52832, nRF52840, etc.)
 - Optional: Oscilloscope
 
 ### HowTo
@@ -52,7 +51,7 @@ To bypass the Readout protection (APPROTECT) of an nRF52 connect all of the abov
    - **ESP32-C3 (4MB):** `pio run -e ESP32-C3_nRF52_SWD`
 5. Upload `data/index.htm` via the web editor at `http://<ip-address>/edit` (login: admin/admin).
 
-**Storage:** Uses LittleFS with large-storage partition schemes (~2.9MB on 4MB ESP32, ~6MB on 8MB S3, ~14MB on 16MB S3) for firmware backup and flashing. 
+**Storage:** Uses LittleFS with large-storage partition schemes (~2.9MB on 4MB ESP32, ~14MB on 16MB ESP32-S3) for firmware backup and flashing. Sufficient for full nRF52840 (1MB) backup + new firmware. 
 
 
 
@@ -64,4 +63,7 @@ To bypass the Readout protection (APPROTECT) of an nRF52 connect all of the abov
 <img width="800" alt="" src="https://github.com/atc1441/ESP32_nRF52_SWD/blob/main/nRF52832_glitchtip.jpg">
 
 
-Credits go to LimitedResults for finding the Power glitching Exploit: https://limitedresults.com/2020/06/nrf52-debug-resurrection-approtect-bypass-part-2/
+Credits go to LimitedResults for finding the Power glitching Exploit: 
+Part 1: https://limitedresults.com/results/nrf52-debug-resurrection-approtect-bypass
+Part 2: https://limitedresults.com/results/nrf52-debug-resurrection-approtect-bypass-part-2
+Pocket Glitcher: https://limitedresults.com/results/the-pocketglitcher
