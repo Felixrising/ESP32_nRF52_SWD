@@ -63,7 +63,8 @@ To bypass the Readout protection (APPROTECT) of an nRF52 connect all of the abov
 <img width="800" alt="" src="https://github.com/atc1441/ESP32_nRF52_SWD/blob/main/nRF52832_glitchtip.jpg">
 
 
-Credits go to LimitedResults for finding the Power glitching Exploit: 
-Part 1: https://limitedresults.com/results/nrf52-debug-resurrection-approtect-bypass
-Part 2: https://limitedresults.com/results/nrf52-debug-resurrection-approtect-bypass-part-2
-Pocket Glitcher: https://limitedresults.com/results/the-pocketglitcher
+***Credits*** go to LimitedResults for finding the Power glitching Exploit:
+
+- Part 1: https://limitedresults.com/results/nrf52-debug-resurrection-approtect-bypass
+- Part 2: https://limitedresults.com/results/nrf52-debug-resurrection-approtect-bypass-part-2
+- Pocket Glitcher: https://limitedresults.com/results/the-pocketglitcher
