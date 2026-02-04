@@ -7,7 +7,7 @@
 #include "nrf_swd.h"
 #include "swd.h"
 #include <FS.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 
 bool is_connected = false;
 long last_ack_check = 0;
@@ -222,7 +222,7 @@ uint8_t erase_page(uint32_t page)
 uint8_t flash_file(uint32_t offset, String &path)
 {
   File file;
-  file = SPIFFS.open(path, "rb");
+  file = LittleFS.open(path, "rb");
   if (file == 0)
   {
     return 1;
@@ -254,7 +254,7 @@ uint8_t dump_flash_to_file(uint32_t offset, uint32_t read_size, String &path)
 {
 
   File file;
-  file = SPIFFS.open(path, "wb");
+  file = LittleFS.open(path, "wb");
   if (file == 0)
   {
     return 1;
@@ -301,11 +301,11 @@ uint8_t nrf_write_bank(uint32_t address, uint32_t buffer[], int size)
 
   for (int posi = 0; posi < size; posi += 4)
   {
-    long end_micros = micros() + 400; //wait till writing of nRF memory is done without asking for ready state
+    uint32_t start_micros = micros();
     AP_Write(AP_DRW, buffer[posi / 4]);
-    while (micros() < end_micros)
+    while ((uint32_t)(micros() - start_micros) < 400)
     {
-    };
+    }
   }
 
   AP_Write(AP_CSW, 0xa2000002);

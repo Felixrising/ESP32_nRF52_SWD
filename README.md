@@ -2,45 +2,57 @@
 This software makes it possible to Read and Write the internal Flash of the Nordic nRF52 series with an ESP32 using the SWD interface.
 A tool to exploit the APPROTECT vulnerability is included as well.
 
-### You can support my work via PayPal: https://paypal.me/hoverboard1 this keeps projects like this coming.
+**Supported boards:** ESP32, ESP32-S3 (4MB, 8MB, or 16MB flash), ESP32-C3. See `platformio.ini` for environment selection.
+
+### Original project (atc1441)
+
+Forked from [atc1441/ESP32_nRF52_SWD](https://github.com/atc1441/ESP32_nRF52_SWD) by Aaron Christophel (ATCnetz.de).
+
+- **Support the original author:** [PayPal](https://paypal.me/hoverboard1)
+- **Demo videos:**
+
+[![YoutubeVideo](https://img.youtube.com/vi/tMPD0kBG_So/0.jpg)](https://www.youtube.com/watch?v=tMPD0kBG_So)
+[![YoutubeVideo](https://img.youtube.com/vi/Iu6RoXRZxOk/0.jpg)](https://www.youtube.com/watch?v=Iu6RoXRZxOk)
+
+### Pin Connections
+
+**ESP32 (default):** SWDCLK=GPIO21, SWDIO=GPIO19, NRF_POWER=GPIO22, GLITCHER=GPIO5, OSCI=GPIO34
+
+**ESP32-S3:** SWDCLK=GPIO41, SWDIO=GPIO42, NRF_POWER=GPIO6, GLITCHER=GPIO4, OSCI=GPIO5
 
 To flash an nRF52 connect the following:
-- nRF52 **SWDCLK** to ESP32 **GPIO 21**
-- nRF52 **SWDIO** to ESP32 **GPIO 19**
+- nRF52 **SWDCLK** to ESP32 **swd_clock_pin** (see platformio.ini for your board)
+- nRF52 **SWDIO** to ESP32 **swd_data_pin**
 - nRF52 **GND** to ESP32 **GND** to N-Channel MOSFET **GND** (Optional: O-scope **GND Clips**)
 - Then power the nRF52 as needed
 
 To bypass the Readout protection (APPROTECT) of an nRF52 connect all of the above and the following:
-- nRF52 3.3V Power **VDD** to ESP32 **GPIO 22** (Optional: O-scope **Channel 2 Probe**)
-- N-Channel MOSFET **PWM+** to ESP32 **GPIO 5** (as shown)
+- nRF52 3.3V Power **VDD** to ESP32 **NRF_POWER** pin (Optional: O-scope **Channel 2 Probe**)
+- N-Channel MOSFET **PWM+** to ESP32 **GLITCHER** pin (as shown)
 - N-Channel MOSFET **VOUT-** to nRF52 **DEC1** (as shown) (Optional: O-scope **Channel 1 Probe**)
 - Then power the nRF52 as needed
 
 
-This repo is explained and demonstrated in these videos (click to watch):
-
-
-[![YoutubeVideo](https://img.youtube.com/vi/tMPD0kBG_So/0.jpg)](https://www.youtube.com/watch?v=tMPD0kBG_So)
-
-
-[![YoutubeVideo](https://img.youtube.com/vi/Iu6RoXRZxOk/0.jpg)](https://www.youtube.com/watch?v=Iu6RoXRZxOk)
-
 ### Required Hardware
 
-- ESP32 Development Board
+- ESP32, ESP32-S3, or ESP32-C3 Development Board
 - N-Channel MOSFET Board
 - nRF52 Series Board
 - Optional: Oscilloscope
 
-### HowTo:
+### HowTo
 
-Use Visual Studio Code with PlatformIO to compile and upload the project.
+1. Use **Visual Studio Code with PlatformIO** to compile and upload the project. (Arduino IDE is not supported.)
+2. Set WiFi credentials in `src/web.cpp` (`ssid` and `password`).
+3. Adjust pin assignments in `platformio.ini` for your board if needed.
+4. Build and upload:
+   - **ESP32 (4MB):** `pio run -e ESP32_nRF52_SWD`
+   - **ESP32-S3 (8MB):** `pio run -e ESP32-S3_8MB_nRF52_SWD`
+   - **ESP32-S3 (16MB):** `pio run -e ESP32-S3_16MB_nRF52_SWD`
+   - **ESP32-C3 (4MB):** `pio run -e ESP32-C3_nRF52_SWD`
+5. Upload `data/index.htm` via the web editor at `http://<ip-address>/edit` (login: admin/admin).
 
-Note: The Arduino IDE is not supported any more!
-
-Change the WiFi credentials in Web.cpp and the Pinout to your needs in the platformio.ini file
-
-Upload the data/index.htm to the ESP32 via the ip-address/edit web editor 
+**Storage:** Uses LittleFS with large-storage partition schemes (~2.9MB on 4MB ESP32, ~6MB on 8MB S3, ~14MB on 16MB S3) for firmware backup and flashing. 
 
 
 

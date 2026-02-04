@@ -151,9 +151,12 @@ void get_osci_graph(uint16_t graph_buff[], uint32_t size, uint32_t delay_time)
     {
       has_fired = 1;
       digitalWrite(GLITCHER, HIGH);
-      graph_buff[i++] = analogRead(OSCI_PIN);
+      graph_buff[i] = analogRead(OSCI_PIN);
       digitalWrite(GLITCHER, LOW);
     }
-    graph_buff[i] = analogRead(OSCI_PIN);
+    else
+    {
+      graph_buff[i] = analogRead(OSCI_PIN);
+    }
   }
 }

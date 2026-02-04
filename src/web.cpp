@@ -4,7 +4,7 @@
 */
 #include <Arduino.h>
 #include <FS.h>
-#include "SPIFFS.h"
+#include <LittleFS.h>
 #include <ESPmDNS.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -98,9 +98,9 @@ void init_web()
   }
   Serial.println("mDNS responder started");
   MDNS.addService("http", "tcp", 80);
-  SPIFFS.begin(true);
+  LittleFS.begin(true);
 
-  server.addHandler(new SPIFFSEditor(SPIFFS, http_username, http_password));
+  server.addHandler(new SPIFFSEditor(LittleFS, http_username, http_password));
 
   server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(200, "text/plain", String(ESP.getFreeHeap())); });
@@ -152,9 +152,9 @@ void init_web()
                 answer_state += String(nrf_ufcr.info_part) + ";";
                 answer_state += String(nrf_ufcr.info_variant) + ";";
                 answer_state += String(nrf_ufcr.info_package) + ";";
-                answer_state += String(SPIFFS.totalBytes()) + ";";
-                answer_state += String(SPIFFS.usedBytes()) + ";";
-                answer_state += String(SPIFFS.totalBytes() - SPIFFS.usedBytes()) + ";";
+                answer_state += String(LittleFS.totalBytes()) + ";";
+                answer_state += String(LittleFS.usedBytes()) + ";";
+                answer_state += String(LittleFS.totalBytes() - LittleFS.usedBytes()) + ";";
                 answer_state += String(nrf_ufcr.sd_info_area) + ";";
                 answer_state += String(nrf_ufcr.ucir_lock) + ";";
               }
@@ -363,7 +363,7 @@ void init_web()
                     request->send(200, "text/plain", "Wrong parameter");
                     return;
                   }
-                  if (!SPIFFS.exists("/" + filename))
+                  if (!LittleFS.exists("/" + filename))
                   {
                     request->send(200, "text/plain", "Error opening file");
                     return;
@@ -393,7 +393,7 @@ void init_web()
                     request->send(200, "text/plain", "Wrong parameter");
                     return;
                   }
-                  if (size > (SPIFFS.totalBytes() - SPIFFS.usedBytes()))
+                  if (size > (LittleFS.totalBytes() - LittleFS.usedBytes()))
                   {
                     request->send(200, "text/plain", "Not enough free space on the ESP32");
                     return;
@@ -448,7 +448,7 @@ void init_web()
                   nrf_info_struct nrf_ufcr;
                   get_new_main_info(&nrf_ufcr);
 
-                  if (nrf_ufcr.flash_size > (SPIFFS.totalBytes() - SPIFFS.usedBytes()))
+                  if (nrf_ufcr.flash_size > (LittleFS.totalBytes() - LittleFS.usedBytes()))
                   {
                     request->send(200, "text/plain", "Not enough free space on the ESP32");
                     return;
@@ -478,7 +478,7 @@ void init_web()
                     return;
                   }
 
-                  if (0x1000 > (SPIFFS.totalBytes() - SPIFFS.usedBytes()))
+                  if (0x1000 > (LittleFS.totalBytes() - LittleFS.usedBytes()))
                   {
                     request->send(200, "text/plain", "Not enough free space on the ESP32");
                     return;
@@ -515,7 +515,7 @@ void init_web()
           upload_failed = false;
           buffer.clear();
 
-          if (request->hasParam("flash_up_file_offset"), true)
+          if (request->hasParam("flash_up_file_offset", true))
           {
             flash_offset = hstol(request->getParam("flash_up_file_offset", true)->value());
           }
@@ -625,12 +625,15 @@ void init_web()
               if (request->hasParam("offset"))
               {
                 offset = hstol(request->getParam("offset")->value());
-
                 if (offset > nrf_ufcr.flash_size)
                 {
                   request->send(400, "text/html", "ERROR: Invalid offset!");
                   return;
                 }
+              }
+              else
+              {
+                offset = 0;
               }
 
               if (request->hasParam("len"))
@@ -669,20 +672,31 @@ void init_web()
             {
               if (request->hasParam("size") && request->hasParam("delay"))
               {
+                const uint32_t max_graph_size = 1024;
                 uint32_t size = request->getParam("size")->value().toInt();
                 uint32_t delay_time = request->getParam("delay")->value().toInt();
-                uint16_t graph_buff[size] = {0};
-                get_osci_graph(graph_buff, size, delay_time);
-                String answer_state = "";
-                for (int i = 0; i < size; i++)
+                if (size > max_graph_size) size = max_graph_size;
+                uint16_t *graph_buff = (uint16_t *)malloc(size * sizeof(uint16_t));
+                if (graph_buff)
                 {
-                  answer_state += String(graph_buff[i]) + ",";
+                  memset(graph_buff, 0, size * sizeof(uint16_t));
+                  get_osci_graph(graph_buff, size, delay_time);
+                  String answer_state = "";
+                  for (uint32_t i = 0; i < size; i++)
+                  {
+                    answer_state += String(graph_buff[i]) + ",";
+                  }
+                  answer_state += "0";
+                  free(graph_buff);
+                  request->send(200, "text/plain", answer_state);
                 }
-                answer_state += "0";
-                request->send(200, "text/plain", answer_state);
+                else
+                {
+                  request->send(500, "text/plain", "Out of memory");
+                }
               } });
 
-  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.htm");
+  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.htm");
 
   server.onNotFound([](AsyncWebServerRequest *request)
                     {
